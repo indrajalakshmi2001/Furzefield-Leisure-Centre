@@ -9,6 +9,7 @@ public class BookingSystem {
     public static void main(String[] args) {
         setupData();
         preRegisteredData();
+        runMenu();
     }
     private static void setupData() {
         for (int i = 1; i <= 10; i++) {
@@ -135,6 +136,7 @@ public class BookingSystem {
 
             switch (choice) {
                 case 1 -> bookLesson(sc, current);
+                case 2 -> changeBooking(sc, current);
                 default -> System.out.println("Invalid option!");
             }
         }
@@ -203,6 +205,112 @@ public class BookingSystem {
             System.out.println("Booking successful! ID: " + b.getBookingId());
         } else {
             System.out.println("Lesson is FULL!");
+        }
+    }
+
+    private static void changeBooking(Scanner sc, Member current) {
+        System.out.println("\n===== YOUR BOOKINGS =====");
+        boolean hasBookings = false;
+        for (Booking b : bookings) {
+            if (b.getMember() == current && !b.getStatus().equals("cancelled")) {
+                System.out.println("ID: " + b.getBookingId()
+                        + " | " + b.getLesson()
+                        + " | Status: " + b.getStatus());
+                hasBookings = true;
+            }
+        }
+        if (!hasBookings) {
+            System.out.println("You have no active bookings.");
+            return;
+        }
+        System.out.print("Enter Booking ID: ");
+        int id = sc.nextInt();
+
+        Booking found = null;
+        for (Booking b : bookings) {
+            if (b.getBookingId() == id) { found = b; break; }
+        }
+
+        if (found == null) {
+            System.out.println("Booking not found!");
+            return;
+        }
+
+        if (found.getStatus().equals("cancelled")) {
+            System.out.println("This booking is already cancelled!");
+            return;
+        }
+
+        if (found.getStatus().equals("attended")) {
+            System.out.println("This booking has already been attended and cannot be changed!");
+            return;
+        }
+
+        System.out.println("Booking ID: " + found.getBookingId()
+                + " | Lesson: " + found.getLesson()
+                + " | Status: " + found.getStatus());
+        System.out.println("1. Change Lesson");
+        System.out.println("2. Cancel Booking");
+        System.out.print("Choose: ");
+        int option = sc.nextInt();
+
+        if (option == 2) {
+            found.cancel();
+            System.out.println("Booking ID " + id + " cancelled successfully. Place released.");
+            return;
+        }
+        System.out.println("\n1. View by Day");
+        System.out.println("2. View by Exercise Type");
+        System.out.print("Choose: ");
+        int viewOption = sc.nextInt();
+
+        List<Lesson> filtered = new ArrayList<>();
+
+        if (viewOption == 1) {
+            System.out.print("Enter day (Saturday/Sunday): ");
+            String day = sc.next();
+            for (Lesson l : lessons)
+                if (l.getDay().equalsIgnoreCase(day)) filtered.add(l);
+        } else {
+            System.out.print("Enter exercise type (Yoga/Zumba/Aquacise/BoxFit/BodyBlitz): ");
+            String type = sc.next();
+            for (Lesson l : lessons)
+                if (l.getExerciseType().equalsIgnoreCase(type)) filtered.add(l);
+        }
+
+        if (filtered.isEmpty()) {
+            System.out.println("No lessons found!");
+            return;
+        }
+
+        for (int i = 0; i < filtered.size(); i++) {
+            Lesson l = filtered.get(i);
+            System.out.println(i + ": " + l
+                    + " | Price: £" + l.getPrice()
+                    + " | Available: " + (4 - l.getBookingCount()));
+        }
+
+        System.out.print("Select lesson index (or -1 to go back): ");
+        int newIndex = sc.nextInt();
+
+        if (newIndex < 0 || newIndex >= filtered.size()) {
+            System.out.println("Returning to main menu.");
+            return;
+        }
+
+        Lesson newLesson = filtered.get(newIndex);
+
+        if (newLesson == found.getLesson()) {
+            System.out.println("That is the same lesson!");
+            return;
+        }
+
+        if (newLesson.addBooking(found)) {
+            found.changeLesson(newLesson);
+            System.out.println("Booking ID " + id + " changed successfully to: " + newLesson
+                    + " | Status: " + found.getStatus());
+        } else {
+            System.out.println("New lesson is FULL! Please select another lesson or return to main menu.");
         }
     }
 
