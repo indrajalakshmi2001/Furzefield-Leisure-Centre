@@ -4,9 +4,11 @@ public class BookingSystem {
 
     private static List<Member> members = new ArrayList<>();
     private static List<Lesson> lessons = new ArrayList<>();
+    private static List<Booking> bookings = new ArrayList<>();
 
     public static void main(String[] args) {
         setupData();
+        preRegisteredData();
     }
     private static void setupData() {
         for (int i = 1; i <= 10; i++) {
@@ -76,6 +78,25 @@ public class BookingSystem {
         lessons.add(new Lesson(8, "Zumba", "Sunday", "Morning", 7.0));
         lessons.add(new Lesson(8, "Yoga", "Sunday", "Afternoon", 8.5));
         lessons.add(new Lesson(8, "BodyBlitz", "Sunday", "Evening", 9.0));
+    }
+
+    private static void preRegisteredData() {
+        Random rand = new Random(1);
+
+        // Make some lessons FULL
+        for (int i = 0; i < 5; i++) {
+            Lesson lesson = lessons.get(i);
+
+            for (int j = 0; j < 4; j++) {
+                Member m = members.get(j);
+                Booking b = new Booking(m, lesson);
+
+                if (lesson.addBooking(b)) {
+                    bookings.add(b);
+                    b.attend(rand.nextInt(5) + 1, "Good session");
+                }
+            }
+        }
     }
 
 }
