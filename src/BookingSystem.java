@@ -313,5 +313,62 @@ public class BookingSystem {
             System.out.println("New lesson is FULL! Please select another lesson or return to main menu.");
         }
     }
+    private static void attendLesson(Scanner sc, Member current) {
+        System.out.println("\n===== YOUR BOOKINGS =====");
+        boolean hasBookings = false;
+        for (Booking b : bookings) {
+            if (b.getMember() == current
+                    && (b.getStatus().equals("booked") || b.getStatus().equals("changed"))) {
+                System.out.println("ID: " + b.getBookingId()
+                        + " | " + b.getLesson()
+                        + " | Status: " + b.getStatus());
+                hasBookings = true;
+            }
+        }
+        if (!hasBookings) {
+            System.out.println("You have no lessons to attend.");
+            return;
+        }
+        System.out.print("Enter Booking ID: ");
+        int id = sc.nextInt();
+
+        Booking found = null;
+        for (Booking b : bookings) {
+            if (b.getBookingId() == id) { found = b; break; }
+        }
+
+        if (found == null) {
+            System.out.println("Booking not found!");
+            return;
+        }
+
+        if (found.getStatus().equals("cancelled")) {
+            System.out.println("This booking is cancelled and cannot be attended!");
+            return;
+        }
+
+        if (found.getStatus().equals("attended")) {
+            System.out.println("This lesson has already been attended!");
+            return;
+        }
+
+        System.out.println("Attending: " + found.getLesson()
+                + " | Member: " + found.getMember().getName());
+
+        int rating = 0;
+        while (rating < 1 || rating > 5) {
+            System.out.print("Enter rating (1-5): ");
+            rating = sc.nextInt();
+            if (rating < 1 || rating > 5)
+                System.out.println("Invalid rating! Must be between 1 and 5.");
+        }
+        sc.nextLine();
+
+        System.out.print("Enter review: ");
+        String comment = sc.nextLine();
+
+        found.attend(rating, comment);
+        System.out.println("Lesson attended! Status updated to: " + found.getStatus());
+    }
 
 }
