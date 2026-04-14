@@ -370,5 +370,54 @@ public class BookingSystem {
         found.attend(rating, comment);
         System.out.println("Lesson attended! Status updated to: " + found.getStatus());
     }
+    private static void monthlyReport(Scanner sc) {
+        System.out.print("Enter month (1 or 2): ");
+        int m = sc.nextInt();
+
+        int start = (m == 1) ? 1 : 5;
+        int end = start + 3;
+
+        for (Lesson l : lessons) {
+            if (l.getWeek() >= start && l.getWeek() <= end) {
+                int attended = 0;
+                for (Booking b : bookings) {
+                    if (b.getLesson() == l && b.getStatus().equals("attended"))
+                        attended++;
+                }
+                System.out.println(l + " | Attended: " + attended
+                        + " | Avg Rating: " + l.getAverageRating());
+            }
+        }
+    }
+    private static void championReport(Scanner sc) {
+        System.out.print("Enter month (1 or 2): ");
+        int m = sc.nextInt();
+
+        int start = (m == 1) ? 1 : 5;
+        int end = start + 3;
+
+        Map<String, Double> income = new HashMap<>();
+
+        for (Lesson l : lessons) {
+            if (l.getWeek() >= start && l.getWeek() <= end) {
+                income.put(l.getExerciseType(),
+                        income.getOrDefault(l.getExerciseType(), 0.0)
+                                + l.getBookingCount() * l.getPrice());
+            }
+        }
+
+        String best = "";
+        double max = 0;
+
+        for (String k : income.keySet()) {
+            System.out.println(k + " -> " + income.get(k));
+            if (income.get(k) > max) {
+                max = income.get(k);
+                best = k;
+            }
+        }
+
+        System.out.println("Champion: " + best);
+    }
 
 }
